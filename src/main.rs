@@ -1,5 +1,7 @@
 use std::env;
 mod glox;
+mod token;
+mod scanner;
 use glox::Glox;
 
 fn main() {
@@ -8,8 +10,10 @@ fn main() {
         panic!("Usage: glox program.lox")
     } else if args.len() == 2 {
         let filepath: &String = &args[1];
-        Glox::run_file(filepath);
+        let mut glox = Glox::new_from_file(filepath);
+        glox.run_file(filepath);
     } else {
-        Glox::run_prompt();
+        let mut glox = Glox::new_for_prompt();
+        glox.run_prompt();
     }
 }
