@@ -57,7 +57,7 @@ impl Token {
 
 // TokenType contains all of the elements in the lexical grammar
 // of the Lox language.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TokenType {
     // Single character tokens
     LeftParen,
