@@ -2,6 +2,8 @@ use std::{io, fs, process};
 
 use crate::token::Token;
 use crate::scanner::Scanner;
+use crate::parser::Parser;
+use crate::error::GloxError;
 pub struct Glox {
     had_error: bool,
     scanner: Scanner
@@ -48,13 +50,17 @@ impl Glox {
 
     fn run(&mut self) {
         let tokens: Vec<Token> = self.scanner.scan_tokens();
-        for token in tokens {
-            println!("{:#?}", token)
+        let mut parser = Parser::new(tokens);
+        
+        match parser.parse() {
+            Ok(expr) => {
+                println!("Parsed: {:#?}", expr);
+            }
+            Err(GloxError::UnexpectedToken { message, line }) => {
+                self.had_error = true;
+                self.report(line as i32, "".to_string(), message);
+            }
         }
-    }
-
-    fn error(&mut self, line: i32, msg: String) {
-        Self::report(self, line, "".to_string(), msg);
     }
 
     fn report(&mut self, line: i32, loc: String, msg: String) {

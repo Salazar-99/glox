@@ -1,7 +1,7 @@
 use crate::token::{Literal, Token};
 
 // TODO: Generate this Enum and its members with generate_ast
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Expr {
     Grouping(Grouping),
     Binary(Binary),
@@ -9,19 +9,19 @@ pub enum Expr {
     Literal(LiteralExpr)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Grouping { 
     pub expression: Box<Expr>
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Binary {
     pub left: Box<Expr>,
     pub operator: Token,
     pub right: Box<Expr>
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Unary {
     pub operator: Token,
     pub right: Box<Expr>
@@ -29,7 +29,7 @@ pub struct Unary {
 
 // LiteralExpr to avoid name overloading
 // with TokenType::Literal -> Literal from parser
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LiteralExpr {
     pub value: Literal
 }
