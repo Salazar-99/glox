@@ -26,7 +26,7 @@ impl Glox {
     }
 
     pub fn run_file(&mut self, filepath: &String) {
-        println!("Running file: {filepath}");
+        println!(format!("Running file: {}", filepath));
         
         self.run();
         if self.had_error {
@@ -34,6 +34,7 @@ impl Glox {
         }
     }
 
+    // TODO: Fix this prompt, it's not printing and is not passing the line to the scanner.
     pub fn run_prompt(&mut self) {
         loop {
             print!("$$$");

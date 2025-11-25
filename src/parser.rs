@@ -81,9 +81,9 @@ impl Parser {
 
     fn primary(&mut self) -> Result<Expr, GloxError> {
         if self.match_token_type(&[TokenType::False]) {
-            return Ok(Expr::Literal(LiteralExpr{value: Literal::Bool}))
+            return Ok(Expr::Literal(LiteralExpr{value: Literal::Bool(false)}))
         } else if self.match_token_type(&[TokenType::True]) {
-            return Ok(Expr::Literal(LiteralExpr{value: Literal::Bool}))
+            return Ok(Expr::Literal(LiteralExpr{value: Literal::Bool(true)}))
         } else if self.match_token_type(&[TokenType::Nil]) {
             return Ok(Expr::Literal(LiteralExpr{value: Literal::Nil}))
         } else if self.match_token_type(&[TokenType::String, TokenType::Number]) {
@@ -95,7 +95,7 @@ impl Parser {
         }
         
         Err(GloxError::UnexpectedToken { 
-            message: "Unexpected token".to_string(), 
+            message: format!("Unexpected token: {:?}", self.peek()),
             line: self.current_line() 
         })
     }

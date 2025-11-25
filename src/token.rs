@@ -23,9 +23,9 @@ pub fn get_keywords() -> HashMap<String, TokenType> {
 
 #[derive(Debug, Clone)]
 pub enum Literal {
-    Float,
-    Str,
-    Bool,
+    Float(f32),
+    Str(String),
+    Bool(bool),
     Nil
 }
 

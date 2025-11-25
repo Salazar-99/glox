@@ -7,6 +7,7 @@ mod scanner;
 mod expr;
 mod parser;
 mod error;
+mod interpreter;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

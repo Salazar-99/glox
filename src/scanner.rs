@@ -44,6 +44,9 @@ impl Scanner {
     }
 
     fn scan_token(&mut self) {
+        if self.is_at_end() {
+            return
+        }
         let c: char = self.advance();
         match c {
             // Single character symbols
@@ -120,7 +123,7 @@ impl Scanner {
 
     fn peek(&mut self) -> char {
         if self.is_at_end() {
-            return '\0'
+            return '\0';
         }
         self.chars[self.current]
     }
@@ -133,7 +136,7 @@ impl Scanner {
     }
 
     fn is_at_end(&mut self) -> bool {
-        if self.current >= self.chars.len() {
+        if self.current == self.chars.len() {
             return true
         }
         return false
@@ -171,8 +174,8 @@ impl Scanner {
         let lexeme = self.source[self.start+1..self.current-1].to_string();
         self.tokens.push(Token {
             token_type: TokenType::String,
-            lexeme: lexeme,
-            literal: Literal::Str,
+            lexeme: lexeme.clone(),
+            literal: Literal::Str(lexeme),
             line: self.line
         })
     }
@@ -197,8 +200,9 @@ impl Scanner {
 
     fn handle_number(&mut self) {
         // Handle initial digits
-        let mut peek: char = self.peek();
+        let mut peek: char = self.peek(); 
         while self.is_digit(peek) {
+            println!("peek: {}", peek);
             self.advance();
             peek = self.peek();
         }
@@ -214,7 +218,9 @@ impl Scanner {
             }
         }
 
-        self.add_token_literal(TokenType::Number, Literal::Float);
+        let number = self.source[self.start..self.current].to_string();
+        let float_value = number.parse::<f32>().unwrap();
+        self.add_token_literal(TokenType::Number, Literal::Float(float_value));
     }
 
     fn handle_identifier(&mut self) {
