@@ -24,11 +24,11 @@ impl Visitor for Interpreter {
     }
 
     fn visit_grouping(&self, expr: &Grouping) -> Result<Literal, GloxError> {
-        return self.evaluate(*expr.expression.clone());
+        return self.evaluate(&expr.expression);
     }
 
     fn visit_unary(&self, expr: &Unary) -> Result<Literal, GloxError> {
-        let right: Literal = self.evaluate(*expr.right.clone())?;
+        let right: Literal = self.evaluate(&expr.right)?;
         match &expr.operator.token_type {
             TokenType::Minus => match right {
                 Literal::Float(f) => return Ok(Literal::Float(-1.0 * f)),
@@ -44,8 +44,8 @@ impl Visitor for Interpreter {
     }
 
     fn visit_binary(&self, expr: &Binary) -> Result<Literal, GloxError> {
-        let left: Literal = self.evaluate(*expr.left.clone())?;
-        let right: Literal = self.evaluate(*expr.right.clone())?;
+        let left: Literal = self.evaluate(&expr.left)?;
+        let right: Literal = self.evaluate(&expr.right)?;
 
         match &expr.operator.token_type {
             TokenType::Minus => match (left, right) {
@@ -114,12 +114,12 @@ impl Interpreter {
         Interpreter {}
     }
 
-    pub fn interpret(&self, expr: Expr) -> Result<Literal, GloxError> {
+    pub fn interpret(&self, expr: &Expr) -> Result<Literal, GloxError> {
         let value: Literal = self.evaluate(expr)?;
         Ok(value)
     }
 
-    fn evaluate(&self, expr: Expr) -> Result<Literal, GloxError> {
+    fn evaluate(&self, expr: &Expr) -> Result<Literal, GloxError> {
         let value: Literal = expr.accept(self.clone())?;
         Ok(value)
     }

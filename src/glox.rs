@@ -59,7 +59,7 @@ impl Glox {
         let mut parser = Parser::new(tokens);
 
         match parser.parse() {
-            Ok(expr) => match self.interpreter.interpret(expr) {
+            Ok(expr) => match self.interpreter.interpret(&expr) {
                 Ok(result) => println!("{:?}", result),
                 Err(e) => {
                     println!("Error: {}", e)
