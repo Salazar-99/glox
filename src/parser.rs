@@ -1,19 +1,19 @@
 use crate::error::GloxError;
 
-use crate::token::{Literal, Token, TokenType};
 use crate::expr::{Binary, Expr, Grouping, LiteralExpr, Unary};
+use crate::token::{Literal, Token, TokenType};
 
 // A Recursive Decent Parser
 pub struct Parser {
     tokens: Vec<Token>,
-    current: usize
+    current: usize,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
             tokens: tokens,
-            current: 0
+            current: 0,
         }
     }
 
@@ -31,18 +31,31 @@ impl Parser {
         while self.match_token_type(&equality_types) {
             let operator: Token = self.previous();
             let right: Expr = self.comparison()?;
-            expr = Expr::Binary(Binary { left: Box::new(expr), operator: operator, right: Box::new(right)});
+            expr = Expr::Binary(Binary {
+                left: Box::new(expr),
+                operator: operator,
+                right: Box::new(right),
+            });
         }
         Ok(expr)
     }
 
     fn comparison(&mut self) -> Result<Expr, GloxError> {
         let mut expr: Expr = self.term()?;
-        let comparison_types: [TokenType; 4] = [TokenType::Greater, TokenType:: GreaterEqual, TokenType::Less, TokenType::LessEqual];
+        let comparison_types: [TokenType; 4] = [
+            TokenType::Greater,
+            TokenType::GreaterEqual,
+            TokenType::Less,
+            TokenType::LessEqual,
+        ];
         while self.match_token_type(&comparison_types) {
             let operator: Token = self.previous();
             let right: Expr = self.term()?;
-            expr = Expr::Binary(Binary { left: Box::new(expr), operator:operator, right: Box::new(right) });
+            expr = Expr::Binary(Binary {
+                left: Box::new(expr),
+                operator: operator,
+                right: Box::new(right),
+            });
         }
         Ok(expr)
     }
@@ -53,7 +66,11 @@ impl Parser {
         while self.match_token_type(&term_types) {
             let operator: Token = self.previous();
             let right: Expr = self.factor()?;
-            expr = Expr::Binary(Binary { left: Box::new(expr), operator:operator, right: Box::new(right) });
+            expr = Expr::Binary(Binary {
+                left: Box::new(expr),
+                operator: operator,
+                right: Box::new(right),
+            });
         }
         Ok(expr)
     }
@@ -64,7 +81,11 @@ impl Parser {
         while self.match_token_type(&factor_types) {
             let operator: Token = self.previous();
             let right: Expr = self.factor()?;
-            expr = Expr::Binary(Binary { left: Box::new(expr), operator:operator, right: Box::new(right) });
+            expr = Expr::Binary(Binary {
+                left: Box::new(expr),
+                operator: operator,
+                right: Box::new(right),
+            });
         }
         Ok(expr)
     }
@@ -74,34 +95,51 @@ impl Parser {
         if self.match_token_type(&unary_types) {
             let operator: Token = self.previous();
             let right: Expr = self.unary()?;
-            return Ok(Expr::Unary(Unary { operator:operator, right: Box::new(right) }));
+            return Ok(Expr::Unary(Unary {
+                operator: operator,
+                right: Box::new(right),
+            }));
         }
         self.primary()
     }
 
     fn primary(&mut self) -> Result<Expr, GloxError> {
         if self.match_token_type(&[TokenType::False]) {
-            return Ok(Expr::Literal(LiteralExpr{value: Literal::Bool(false)}))
+            return Ok(Expr::Literal(LiteralExpr {
+                value: Literal::Bool(false),
+            }));
         } else if self.match_token_type(&[TokenType::True]) {
-            return Ok(Expr::Literal(LiteralExpr{value: Literal::Bool(true)}))
+            return Ok(Expr::Literal(LiteralExpr {
+                value: Literal::Bool(true),
+            }));
         } else if self.match_token_type(&[TokenType::Nil]) {
-            return Ok(Expr::Literal(LiteralExpr{value: Literal::Nil}))
+            return Ok(Expr::Literal(LiteralExpr {
+                value: Literal::Nil,
+            }));
         } else if self.match_token_type(&[TokenType::String, TokenType::Number]) {
-            return Ok(Expr::Literal(LiteralExpr { value: self.previous().literal}))
+            return Ok(Expr::Literal(LiteralExpr {
+                value: self.previous().literal,
+            }));
         } else if self.match_token_type(&[TokenType::LeftParen]) {
             let expr: Expr = self.expression()?;
             self.consume(TokenType::RightParen, "Expect ')' after expression.")?;
-            return Ok(Expr::Grouping(Grouping{expression: Box::new(expr)}));
+            return Ok(Expr::Grouping(Grouping {
+                expression: Box::new(expr),
+            }));
         }
-        
-        Err(GloxError::UnexpectedToken { 
-            message: format!("Unexpected token: {:?}", self.peek()),
-            line: self.current_line() 
-        })
+
+        Err(GloxError::UnexpectedToken(
+            self.peek_lexeme(),
+            self.current_line().try_into().unwrap(),
+        ))
     }
-    
+
     fn peek(&mut self) -> TokenType {
         return self.tokens.get(self.current).unwrap().token_type;
+    }
+
+    fn peek_lexeme(&mut self) -> String {
+        return self.tokens.get(self.current).unwrap().lexeme.clone();
     }
 
     fn current_line(&self) -> usize {
@@ -115,58 +153,67 @@ impl Parser {
     }
 
     fn previous(&mut self) -> Token {
-        return self.tokens.get(self.current - 1).unwrap().clone()
+        return self.tokens.get(self.current - 1).unwrap().clone();
     }
 
     fn is_at_end(&mut self) -> bool {
-        return self.peek() == TokenType::EOF
+        return self.peek() == TokenType::EOF;
     }
 
     fn advance(&mut self) -> Token {
         if !self.is_at_end() {
             self.current += 1
         }
-        return self.previous()
+        return self.previous();
     }
 
     fn check(&mut self, typ: TokenType) -> bool {
         if self.is_at_end() {
-            return false
+            return false;
         }
-        return self.peek() == typ
+        return self.peek() == typ;
     }
 
     fn match_token_type(&mut self, token_types: &[TokenType]) -> bool {
         for typ in token_types {
             if self.check(*typ) {
                 self.advance();
-                return true
+                return true;
             }
         }
-        return false
+        return false;
     }
 
     fn consume(&mut self, typ: TokenType, message: &str) -> Result<Token, GloxError> {
         if self.check(typ) {
             Ok(self.advance())
         } else {
-            Err(GloxError::UnexpectedToken { 
-                message: message.to_string(), 
-                line: self.current_line() 
-            })
+            Err(GloxError::UnexpectedToken(
+                message.to_string(),
+                self.current_line().try_into().unwrap(),
+            ))
         }
     }
 
-    fn synchronize(&mut self) {
-        self.advance();
-        while !self.is_at_end() {
-            if self.previous().token_type == TokenType::Semicolon {
-                return
-            }
-        }
-        match self.peek() {
-            TokenType::Class | TokenType::For | TokenType::If | TokenType::Print | TokenType::Return | TokenType::Var | TokenType::While | TokenType::Fun => return,
-            _ => { self.advance(); }
-        }
-    }
+    // fn synchronize(&mut self) {
+    //     self.advance();
+    //     while !self.is_at_end() {
+    //         if self.previous().token_type == TokenType::Semicolon {
+    //             return;
+    //         }
+    //     }
+    //     match self.peek() {
+    //         TokenType::Class
+    //         | TokenType::For
+    //         | TokenType::If
+    //         | TokenType::Print
+    //         | TokenType::Return
+    //         | TokenType::Var
+    //         | TokenType::While
+    //         | TokenType::Fun => return,
+    //         _ => {
+    //             self.advance();
+    //         }
+    //     }
+    // }
 }

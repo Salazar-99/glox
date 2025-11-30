@@ -1,9 +1,9 @@
 use std::fmt;
-use std::error;
 
+#[derive(Debug)]
 pub enum GloxError {
-    // Used during Parsing
-    UnexpectedToken(String),
+    // Used during Parsing, holds the bad token and the line number
+    UnexpectedToken(String, i32),
 
     // Used during Interpreter pass
     RuntimeError(String)
@@ -12,7 +12,7 @@ pub enum GloxError {
 impl fmt::Display for GloxError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            GloxError::UnexpectedToken(s) => write!(f, "Parsing error, unexpected token: {}", s),
+            GloxError::UnexpectedToken(s, line) => write!(f, "Parsing error, unexpected token: {} at line: {}", s, line),
             GloxError::RuntimeError(s) => write!(f, "RuntimeError: {}", s)
         }
     }

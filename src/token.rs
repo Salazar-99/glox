@@ -26,7 +26,7 @@ pub enum Literal {
     Float(f32),
     Str(String),
     Bool(bool),
-    Nil
+    Nil,
 }
 
 #[derive(Debug, Clone)]
@@ -34,26 +34,10 @@ pub struct Token {
     pub token_type: TokenType,
     pub lexeme: String,
     pub literal: Literal,
-    pub line: usize
+    pub line: usize,
 }
 
-impl Token {
-    pub fn new(token_type: TokenType, lexeme: String, literal: Literal, line: usize) -> Token {
-        Token {
-            token_type: token_type,
-            lexeme: lexeme,
-            literal: literal,
-            line: line
-        }
-    }
-
-    pub fn to_string(&self) {
-        let token_type = &self.token_type;
-        let lexeme = &self.lexeme;
-        let literal = &self.literal;
-        println!("Type: {:#?}, Lexeme: {:#?}, Literal: {:#?}", token_type, lexeme, literal)
-    }
-}
+impl Token {}
 
 // TokenType contains all of the elements in the lexical grammar
 // of the Lox language.
@@ -102,5 +86,5 @@ pub enum TokenType {
     Var,
     While,
     // Special
-    EOF
+    EOF,
 }

@@ -3,7 +3,6 @@ A Rust implementation of the Lox programming language from Crafting Interpreters
 
 ## TODO
 - Fix prompt
-- Wire up intepreter to Glox struct
 - Add proper error handling and reporting in both the parser and interpeter
 
 ## Notes

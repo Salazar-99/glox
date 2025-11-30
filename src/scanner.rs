@@ -23,7 +23,7 @@ impl Scanner {
             start: 0,
             current: 0,
             line: 1,
-            keywords: keywords
+            keywords: keywords,
         }
     }
 
@@ -37,7 +37,7 @@ impl Scanner {
             token_type: TokenType::EOF,
             lexeme: "".to_string(),
             literal: Literal::Nil,
-            line: self.line
+            line: self.line,
         };
         self.tokens.push(final_token);
         self.tokens.clone()
@@ -45,7 +45,7 @@ impl Scanner {
 
     fn scan_token(&mut self) {
         if self.is_at_end() {
-            return
+            return;
         }
         let c: char = self.advance();
         match c {
@@ -62,16 +62,32 @@ impl Scanner {
             '*' => self.add_token(TokenType::Star),
             // One or two character symbols
             '!' => {
-                if self.check('=') {self.add_token(TokenType::BangEqual)} else {self.add_token(TokenType::Bang)}
+                if self.check('=') {
+                    self.add_token(TokenType::BangEqual)
+                } else {
+                    self.add_token(TokenType::Bang)
+                }
             }
             '=' => {
-                if self.check('=') {self.add_token(TokenType::EqualEqual)} else {self.add_token(TokenType::Equal)}
+                if self.check('=') {
+                    self.add_token(TokenType::EqualEqual)
+                } else {
+                    self.add_token(TokenType::Equal)
+                }
             }
             '<' => {
-                if self.check('=') {self.add_token(TokenType::LessEqual)} else {self.add_token(TokenType::Less)} 
+                if self.check('=') {
+                    self.add_token(TokenType::LessEqual)
+                } else {
+                    self.add_token(TokenType::Less)
+                }
             }
             '>' => {
-                if self.check('=') {self.add_token(TokenType::GreaterEqual)} else {self.add_token(TokenType::Greater)} 
+                if self.check('=') {
+                    self.add_token(TokenType::GreaterEqual)
+                } else {
+                    self.add_token(TokenType::Greater)
+                }
             }
             // Check for comments
             '/' => {
@@ -88,11 +104,11 @@ impl Scanner {
             '\r' => {}
             '\t' => {}
             // New lines
-            '\n' => { self.line += 1 }
+            '\n' => self.line += 1,
             // String literals
-            '"' => { self.handle_string() }
+            '"' => self.handle_string(),
             // Numbers, identifiers, and keywords
-             _ => {
+            _ => {
                 if self.is_digit(c) {
                     self.handle_number();
                 } else if self.is_alpha(c) {
@@ -100,22 +116,22 @@ impl Scanner {
                 } else {
                     eprintln!("Unexpected character: {c}")
                 }
-             }
+            }
         }
     }
 
-    fn advance(&mut self) -> char{
+    fn advance(&mut self) -> char {
         // Get the current character then move the index up by one
         let current_char = self.chars[self.current];
         self.current += 1;
-        return current_char
+        return current_char;
     }
 
     fn check(&mut self, c: char) -> bool {
         if self.is_at_end() {
-            return false
+            return false;
         } else if self.chars[self.current] != c {
-            return false
+            return false;
         }
         self.current += 1;
         return true;
@@ -130,28 +146,28 @@ impl Scanner {
 
     fn peek_next(&mut self) -> char {
         if self.is_at_end() {
-            return '\0'
+            return '\0';
         }
-        self.chars[self.current+1]
+        self.chars[self.current + 1]
     }
 
     fn is_at_end(&mut self) -> bool {
         if self.current == self.chars.len() {
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 
     fn is_digit(&mut self, c: char) -> bool {
-        return c >= '0' && c <= '9'
+        return c >= '0' && c <= '9';
     }
 
     fn is_alpha(&mut self, c: char) -> bool {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
     }
 
     fn is_alphanumeric(&mut self, c: char) -> bool {
-        return self.is_alpha(c) || self.is_digit(c)
+        return self.is_alpha(c) || self.is_digit(c);
     }
 
     fn add_token(&mut self, token_type: TokenType) {
@@ -165,18 +181,18 @@ impl Scanner {
             token_type: token_type,
             lexeme: lexeme,
             literal: literal,
-            line: self.line
+            line: self.line,
         })
     }
 
     fn add_token_string(&mut self) {
         // Trim the quotes
-        let lexeme = self.source[self.start+1..self.current-1].to_string();
+        let lexeme = self.source[self.start + 1..self.current - 1].to_string();
         self.tokens.push(Token {
             token_type: TokenType::String,
             lexeme: lexeme.clone(),
             literal: Literal::Str(lexeme),
-            line: self.line
+            line: self.line,
         })
     }
 
@@ -200,9 +216,8 @@ impl Scanner {
 
     fn handle_number(&mut self) {
         // Handle initial digits
-        let mut peek: char = self.peek(); 
+        let mut peek: char = self.peek();
         while self.is_digit(peek) {
-            println!("peek: {}", peek);
             self.advance();
             peek = self.peek();
         }
@@ -231,7 +246,11 @@ impl Scanner {
         }
         let text: String = self.source[self.start..self.current].to_string();
         // Try to match the text to a keyword otherwise it's an Identifier
-        let token_type: TokenType = self.keywords.get(&text).copied().unwrap_or(TokenType::Identifier);
+        let token_type: TokenType = self
+            .keywords
+            .get(&text)
+            .copied()
+            .unwrap_or(TokenType::Identifier);
         self.add_token(token_type);
     }
 }

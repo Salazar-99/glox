@@ -1,33 +1,36 @@
-use std::{io, fs, process};
+use std::{fs, io, process};
 
-use crate::token::Token;
-use crate::scanner::Scanner;
+use crate::interpreter::Interpreter;
 use crate::parser::Parser;
-use crate::error::GloxError;
+use crate::scanner::Scanner;
+use crate::token::Token;
 pub struct Glox {
     had_error: bool,
-    scanner: Scanner
+    scanner: Scanner,
+    interpreter: Interpreter,
 }
 
 impl Glox {
     pub fn new_from_file(filepath: &String) -> Self {
         let code = fs::read_to_string(filepath).expect("failed to read file: {filepath}");
-        Glox { 
+        Glox {
             had_error: false,
-            scanner: Scanner::new(code)
+            scanner: Scanner::new(code),
+            interpreter: Interpreter::new(),
         }
     }
 
     pub fn new_for_prompt() -> Self {
-        Glox { 
+        Glox {
             had_error: false,
-            scanner: Scanner::new(String::new())
+            scanner: Scanner::new(String::new()),
+            interpreter: Interpreter::new(),
         }
     }
 
     pub fn run_file(&mut self, filepath: &String) {
-        println!(format!("Running file: {}", filepath));
-        
+        println!("{}", format!("Running file: {}", filepath));
+
         self.run();
         if self.had_error {
             process::exit(65);
@@ -39,7 +42,9 @@ impl Glox {
         loop {
             print!("$$$");
             let mut line = String::new();
-            io::stdin().read_line(&mut line).expect("failed to read line");
+            io::stdin()
+                .read_line(&mut line)
+                .expect("failed to read line");
             if line.is_empty() {
                 break;
             }
@@ -52,21 +57,18 @@ impl Glox {
     fn run(&mut self) {
         let tokens: Vec<Token> = self.scanner.scan_tokens();
         let mut parser = Parser::new(tokens);
-        
+
         match parser.parse() {
-            Ok(expr) => {
-                println!("Parsed: {:#?}", expr);
-            }
-            Err(GloxError::UnexpectedToken { message, line }) => {
+            Ok(expr) => match self.interpreter.interpret(expr) {
+                Ok(result) => println!("{:?}", result),
+                Err(e) => {
+                    println!("Error: {}", e)
+                }
+            },
+            Err(e) => {
                 self.had_error = true;
-                self.report(line as i32, "".to_string(), message);
+                eprintln!("{}", e)
             }
         }
     }
-
-    fn report(&mut self, line: i32, loc: String, msg: String) {
-        self.had_error = true;
-        eprintln!("[line {line}] Error {loc}: {msg}")
-    }
 }
-
